@@ -17,25 +17,26 @@
     </template>
 
     <script setup lang="ts">
-    import { ref } from 'vue'
+    import { ref, onMounted } from 'vue'
     import axios from 'axios'
     import type { Task } from '../types'
-    import { onMounted } from 'vue'
 
     const tasks = ref<Task[]>([])
     const loading = ref(false)
     const error = ref(null)
     const newTask = ref("")
 
+    const API_URL = process.env.VUE_APP_BACKEND_API_BASE_URL as string
+    
     onMounted(() =>{
-        fetchUsers()
+        fetchUsers()   
     })
 
     const fetchUsers = async () => {
     loading.value = true
     error.value = null
     try {
-        const response = await axios.get<Task[]>('https://127.0.0.1/api/tasks')
+        const response = await axios.get<Task[]>(`${API_URL}/tasks`)
         tasks.value = response.data
     } catch (err) {
         error.value = 'Error al cargar los usuarios'
