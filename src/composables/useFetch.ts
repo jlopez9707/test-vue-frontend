@@ -11,7 +11,7 @@ export function useFetch<T>(url: string, config?: AxiosRequestConfig) {
     error.value = null
     try {
       const response = await axios.get<T>(url, config)
-      data.value = response.data
+      data.value = (response.data as any).data ?? response.data
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : 'Error fetching data'
     } finally {
