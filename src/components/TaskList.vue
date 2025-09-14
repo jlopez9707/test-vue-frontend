@@ -68,81 +68,31 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useApi } from '@/composables/useApi'
-import type { Task, Keyword } from '@/types'
 import { useI18n } from 'vue-i18n'
+import { useTasksAndKeywords } from '@/composables/useTasksAndKeywords'
 
 const API_URL = process.env.VUE_APP_BACKEND_API_BASE_URL as string
 const { t } = useI18n()
 
 const {
-    data: keywords,
-    loading: loadingKeywords,
-    error: keywordListError,
-    fetchData: fetchKeywords
-} = useApi<Keyword[]>(`${API_URL}/keywords`)
+  keywords,
+  loadingKeywords,
+  keywordListError,
+  keywordError,
+  creatingKeyword,
+  newKeyword,
+  keywordOptions,
+  addKeyword,
 
-const {
-    loading: creatingKeyword,
-    error: keywordError,
-    fetchData: createKeyword
-} = useApi<Keyword, { name: string }>(`${API_URL}/keywords`, 'POST')
-
-const newKeyword = ref('')
-const newTask = ref('')
-const selectedKeywords = ref<number[]>([])
-const keywordOptions = computed(() => keywords.value ?? [])
-
-const togglingIds = ref<Set<number>>(new Set())
-
-const addKeyword = async () => {
-    if (!newKeyword.value.trim()) return
-    await createKeyword({ name: newKeyword.value })
-    newKeyword.value = ''
-    await fetchKeywords()
-}
-
-const {
-    data: tasks,
-    loading: loadingTasks,
-    error: tasksError,
-    fetchData: fetchTasks
-} = useApi<Task[]>(`${API_URL}/tasks`)
-
-const {
-    loading: creatingTask,
-    error: taskError,
-    fetchData: createTask
-} = useApi<Task, { title: string; keyword_ids: number[] }>(
-    `${API_URL}/tasks`,
-    'POST'
-)
-
-const addTask = async () => {
-    if (!newTask.value.trim()) return
-    await createTask({
-        title: newTask.value,
-        keyword_ids: selectedKeywords.value
-    })
-    newTask.value = ''
-    selectedKeywords.value = []
-    await fetchTasks()
-}
-
-const toggleStatus = async (task: Task) => {
-    togglingIds.value.add(task.id)
-    const { fetchData } = useApi<Task, { is_done: boolean }>(
-        `${API_URL}/tasks/${task.id}/toggle`,
-        'PATCH'
-    )
-    await fetchData({ is_done: !task.is_done })
-    togglingIds.value.delete(task.id)
-    await fetchTasks()
-}
-
-onMounted(() => {
-    fetchKeywords()
-    fetchTasks()
-})
+  tasks,
+  loadingTasks,
+  tasksError,
+  creatingTask,
+  taskError,
+  newTask,
+  selectedKeywords,
+  togglingIds,
+  addTask,
+  toggleStatus
+} = useTasksAndKeywords(API_URL)
 </script>
