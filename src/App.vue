@@ -3,5 +3,9 @@
 </script>
 
 <template>
-  <TaskList/>
+  <div class="full-height row items-center justify-center">
+    <div class="q-pa-md" style="max-width: 600px; width: 100%">
+      <TaskList/>
+    </div>
+  </div>
 </template>
