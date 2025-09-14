@@ -1,13 +1,7 @@
-const plugins = [
-  require('autoprefixer')
-]
-
-if (process.env.QUASAR_RTL) {
-  plugins.push(
-    require('postcss-rtlcss')({})
-  )
-}
-
 module.exports = {
-  plugins
+  plugins: [
+    require('tailwindcss'),
+    require('autoprefixer'),
+    ...(process.env.QUASAR_RTL ? [require('postcss-rtlcss')({})] : [])
+  ]
 }
