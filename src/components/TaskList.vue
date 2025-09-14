@@ -1,11 +1,11 @@
 <template>
     <div class="q-pa-md" style="max-width: 600px">
         <q-card flat bordered class="q-pa-md q-mb-lg">
-            <div class="text-h6 q-mb-sm">Palabras clave</div>
+            <div class="text-h6 q-mb-sm">{{ t('keywords') }}</div>
 
-            <q-input v-model="newKeyword" label="Nueva keyword" outlined dense />
+            <q-input v-model="newKeyword" :label="t('newKeyword')" outlined dense />
             <div class="q-mt-sm">
-                <q-btn color="secondary" label="Agregar keyword" :loading="creatingKeyword" @click="addKeyword" />
+                <q-btn color="secondary" :label="t('addKeyword')" :loading="creatingKeyword" @click="addKeyword" />
                 <p v-if="keywordError" class="text-negative q-mt-sm">{{ keywordError }}</p>
             </div>
 
@@ -16,26 +16,26 @@
                 </q-item>
                 <p v-if="keywordListError" class="text-negative q-mt-sm">{{ keywordListError }}</p>
             </q-list>
-            <p v-if="!loadingKeywords && keywords?.length === 0" class="q-mt-sm">No hay keywords</p>
+            <p v-if="!loadingKeywords && keywords?.length === 0" class="q-mt-sm">{{ t('noKeywords') }}</p>
         </q-card>
 
         <q-card flat bordered class="q-pa-md q-mb-lg">
-            <div class="text-h6 q-mb-sm">Nueva tarea</div>
+            <div class="text-h6 q-mb-sm">{{ t('newTask') }}</div>
 
-            <q-input v-model="newTask" label="Título de la tarea" outlined dense />
+            <q-input v-model="newTask" :label="t('taskTitle')" outlined dense />
 
-            <q-select v-model="selectedKeywords" :options="keywordOptions" option-value="id" option-label="name" multiple
-                outlined use-chips emit-value map-options class="q-mt-sm" label="Selecciona keywords"
+            <q-select v-model="selectedKeywords" :options="keywordOptions" option-value="id" option-label="name"
+                multiple outlined use-chips emit-value map-options class="q-mt-sm" :label="t('selectKeywords')"
                 :loading="loadingKeywords" />
 
             <div class="q-mt-md">
-                <q-btn color="primary" label="Crear tarea" :loading="creatingTask" @click="addTask" />
+                <q-btn color="primary" :label="t('createTask')" :loading="creatingTask" @click="addTask" />
                 <p v-if="taskError" class="text-negative q-mt-sm">{{ taskError }}</p>
             </div>
         </q-card>
 
         <q-card flat bordered class="q-pa-md">
-            <div class="text-h6 q-mb-sm">Tareas</div>
+            <div class="text-h6 q-mb-sm">{{ t('tasks') }}</div>
 
             <q-spinner v-if="loadingTasks" color="primary" size="30px" />
             <p v-else-if="tasksError" class="text-negative">{{ tasksError }}</p>
@@ -45,7 +45,7 @@
                     <q-item-section>
                         <div class="text-weight-medium">{{ task.title }}</div>
                         <div class="text-caption text-grey">
-                            Palabras clave:
+                            {{ t('keywordsLabel') }}
                             <span v-if="task.keywords?.length">
                                 {{task.keywords.map(k => k.name).join(', ')}}
                             </span>
@@ -55,23 +55,26 @@
 
                     <q-item-section side>
                         <q-btn size="sm" :color="task.is_done ? 'positive' : 'warning'"
-                            :label="task.is_done ? 'Completada' : 'Pendiente'" @click="toggleStatus(task)"
+                            :label="task.is_done ? t('completed') : t('pending')" @click="toggleStatus(task)"
                             :loading="togglingIds.has(task.id)" />
                     </q-item-section>
                 </q-item>
             </q-list>
 
-            <p v-if="!loadingTasks && tasks?.length === 0" class="q-mt-md">No hay tareas</p>
+            <p v-if="!loadingTasks && tasks?.length === 0" class="q-mt-md">{{ t('noTasks') }}</p>
         </q-card>
     </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useApi } from '@/composables/useApi'
 import type { Task, Keyword } from '@/types'
+import { useI18n } from 'vue-i18n'
 
 const API_URL = process.env.VUE_APP_BACKEND_API_BASE_URL as string
+const { t } = useI18n()
 
 const {
     data: keywords,
