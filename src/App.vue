@@ -3,9 +3,10 @@
 </script>
 
 <template>
-  <div class="full-height row items-center justify-center">
-    <div class="q-pa-md" style="max-width: 600px; width: 100%">
-      <TaskList/>
+  <div class="h-screen flex items-center justify-center">
+    <div class="w-full max-w-2xl p-6">
+      <TaskList />
     </div>
   </div>
 </template>
+
