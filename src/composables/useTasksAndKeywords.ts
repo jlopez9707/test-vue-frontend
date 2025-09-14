@@ -1,8 +1,11 @@
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import type { Task, Keyword } from '@/types'
 
 export function useTasksAndKeywords(apiUrl: string) {
+  const { t } = useI18n()
+
   const {
     data: keywords,
     loading: loadingKeywords,
@@ -18,10 +21,25 @@ export function useTasksAndKeywords(apiUrl: string) {
 
   const newKeyword = ref('')
   const keywordOptions = computed(() => keywords.value ?? [])
+  const keywordValidationError = ref('')
+
+  const validateKeyword = (): true | string => {
+    const value = newKeyword.value.trim()
+    if (!value) return t('keywordRequired')           // al menos una letra
+    if (value.length > 50) return t('keywordMaxLength')
+    if (!/^[\w\s]+$/.test(value)) return t('keywordInvalid')
+    return true
+  }
 
   const addKeyword = async () => {
-    if (!newKeyword.value.trim()) return
-    await createKeyword({ name: newKeyword.value })
+    const validation = validateKeyword()
+    if (validation !== true) {
+      keywordValidationError.value = validation
+      return
+    }
+    keywordValidationError.value = ''
+
+    await createKeyword({ name: newKeyword.value.trim() })
     newKeyword.value = ''
     await fetchKeywords()
   }
@@ -37,19 +55,31 @@ export function useTasksAndKeywords(apiUrl: string) {
     loading: creatingTask,
     error: taskError,
     fetchData: createTask
-  } = useApi<Task, { title: string; keyword_ids: number[] }>(
-    `${apiUrl}/tasks`,
-    'POST'
-  )
+  } = useApi<Task, { title: string; keyword_ids: number[] }>(`${apiUrl}/tasks`, 'POST')
 
   const newTask = ref('')
   const selectedKeywords = ref<number[]>([])
   const togglingIds = ref<Set<number>>(new Set())
+  const taskValidationError = ref('')
+
+  const validateTask = (): true | string => {
+    const value = newTask.value.trim()
+    if (!value) return t('taskRequired')
+    if (value.length < 3) return t('taskMinLength')
+    if (value.length > 100) return t('taskMaxLength')
+    return true
+  }
 
   const addTask = async () => {
-    if (!newTask.value.trim()) return
+    const validation = validateTask()
+    if (validation !== true) {
+      taskValidationError.value = validation
+      return
+    }
+    taskValidationError.value = ''
+
     await createTask({
-      title: newTask.value,
+      title: newTask.value.trim(),
       keyword_ids: selectedKeywords.value
     })
     newTask.value = ''
@@ -74,24 +104,27 @@ export function useTasksAndKeywords(apiUrl: string) {
   })
 
   return {
-    keywords,
-    loadingKeywords,
-    keywordListError,
-    keywordError,
-    creatingKeyword,
     newKeyword,
     keywordOptions,
     addKeyword,
+    validateKeyword,
+    keywordValidationError,
+    loadingKeywords,
+    creatingKeyword,
+    keywordError,
+    keywordListError,
 
-    tasks,
-    loadingTasks,
-    tasksError,
-    creatingTask,
-    taskError,
     newTask,
     selectedKeywords,
-    togglingIds,
     addTask,
+    validateTask,
+    taskValidationError,
+    tasks,
+    loadingTasks,
+    creatingTask,
+    tasksError,
+    taskError,
     toggleStatus,
+    togglingIds,
   }
 }
